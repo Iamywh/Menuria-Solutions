@@ -26,28 +26,30 @@ function App() {
   const catLabel = (id) => ({ all: t("cat_all"), med: t("cat_med"), piz: t("cat_piz"), bar: t("cat_bar"), cafe: t("cat_cafe") }[id] || id);
 
   return <div className="relative min-h-screen"><Header lang={lang} setLang={setLang} t={t} /><Hero t={t} /><MissionSection t={t} /><FeaturesSection t={t} /><RestaurantsSection t={t} restaurants={restaurantsData} query={query} setQuery={setQuery} cat={cat} setCat={setCat} catLabel={catLabel} /><DemoSection t={t} lang={lang} /><PlansSection t={t} /><FounderSection t={t} /><ContactCta t={t} /><Footer t={t} /></div>;
-  return (
-  <div className="relative min-h-screen">
+ return (
+  <div className="relative min-h-screen overflow-hidden text-white">
     <AnimatedBackground />
 
-    <Header lang={lang} setLang={setLang} t={t} />
-    <Hero t={t} />
-    <MissionSection t={t} />
-    <FeaturesSection t={t} />
-    <RestaurantsSection
-      t={t}
-      restaurants={restaurantsData}
-      query={query}
-      setQuery={setQuery}
-      cat={cat}
-      setCat={setCat}
-      catLabel={catLabel}
-    />
-    <DemoSection t={t} lang={lang} />
-    <PlansSection t={t} />
-    <FounderSection t={t} />
-    <ContactCta t={t} />
-    <Footer t={t} />
+    <div className="relative z-10">
+      <Header lang={lang} setLang={setLang} t={t} />
+      <Hero t={t} />
+      <MissionSection t={t} />
+      <FeaturesSection t={t} />
+      <RestaurantsSection
+        t={t}
+        restaurants={restaurantsData}
+        query={query}
+        setQuery={setQuery}
+        cat={cat}
+        setCat={setCat}
+        catLabel={catLabel}
+      />
+      <DemoSection t={t} lang={lang} />
+      <PlansSection t={t} />
+      <FounderSection t={t} />
+      <ContactCta t={t} />
+      <Footer t={t} />
+    </div>
   </div>
 );
 }

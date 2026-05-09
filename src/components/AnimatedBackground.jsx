@@ -101,12 +101,12 @@ function AnimatedBackground() {
   
 
   return (
-    <canvas
-      id="bg"
-      className="fixed inset-0 -z-10 h-full w-full"
-      aria-hidden="true"
-    />
-  );
+  <canvas
+    id="bg"
+    className="fixed inset-0 z-0 h-full w-full"
+    aria-hidden="true"
+  />
+);
 }
 
 export default AnimatedBackground;
