@@ -1,0 +1,4 @@
+function ContactCta({ t }) {
+  return <section className="py-8"><div className="mx-auto w-[min(1200px,94%)] grid gap-4 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-white/10 bg-gradient-to-r from-cyan-400/10 to-yellow-300/10 p-6"><div><h3 className="text-xl font-black">{t("contact_cta_title")}</h3><p className="text-sm text-slate-300">{t("contact_cta_sub")}</p></div><div className="flex flex-col sm:flex-row gap-3"><a href="mailto:menuriasolutions@gmail.com" className="text-center px-5 py-3 rounded-xl font-extrabold text-[#10141a] bg-gradient-to-r from-yellow-300 to-yellow-200">{t("email")}</a><a href="#demo" className="text-center px-5 py-3 rounded-xl font-extrabold border border-white/10 hover:border-cyan-400/60">{t("cta_demo")}</a></div></div></section>;
+}
+export default ContactCta;

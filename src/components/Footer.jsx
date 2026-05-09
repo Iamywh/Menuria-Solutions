@@ -1,0 +1,4 @@
+function Footer({ t }) {
+  return <footer id="contatti" className="border-t border-white/10"><div className="mx-auto w-[min(1200px,94%)] flex flex-col sm:flex-row items-center justify-between gap-4 py-6 text-slate-400 text-center sm:text-left"><div className="flex items-center gap-3"><img src="/assets/img/logo.jpg" alt="Menuria Solutions Logo" className="h-9 w-9 rounded-lg border-2 border-cyan-400 bg-[#0a1320] object-cover" /><div className="text-xs uppercase tracking-widest font-black text-slate-300">{t("brand")}</div></div><div className="flex items-center gap-4"><a href="https://www.instagram.com/menuriasolutionssl/" target="_blank" rel="noreferrer" className="hover:text-yellow-300">{t("instagram")}</a><a href="mailto:menuriasolutions@gmail.com" className="hover:text-yellow-300">{t("email")}</a></div><div className="text-xs">© {new Date().getFullYear()} Menuria Solutions S.L.</div></div></footer>;
+}
+export default Footer;
