@@ -40,6 +40,82 @@ function AdminLeads() {
     setMessage('')
   }
 
+  const generateAccessCode = (restaurantName = '') => {
+  const cleanPrefix = restaurantName
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.slice(0, 3))
+    .join('-') || 'MENURIA'
+
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase()
+
+  return `${cleanPrefix}-2026-${randomPart}`
+}
+
+const createOnboardingFromLead = async (lead) => {
+  setMessage('')
+
+  if (lead.client_id) {
+    setMessage('Este lead ya tiene un onboarding creado.')
+    return
+  }
+
+  const accessCode = generateAccessCode(lead.restaurant_name)
+
+  const { data: clientData, error: clientError } = await supabase
+    .from('clients')
+    .insert({
+      restaurant_name: lead.restaurant_name || 'Restaurante sin nombre',
+      contact_name: lead.contact_name,
+      email: lead.email || null,
+      phone: lead.phone || null,
+      access_code: accessCode,
+      status: 'onboarding',
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single()
+
+  if (clientError) {
+    console.error(clientError)
+    setMessage('No se pudo crear el onboarding para este lead.')
+    return
+  }
+
+  const { error: leadError } = await supabase
+    .from('leads')
+    .update({
+      status: 'accepted',
+      client_id: clientData.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', lead.id)
+
+  if (leadError) {
+    console.error(leadError)
+    setMessage('Cliente creado, pero no se pudo vincular el lead.')
+    return
+  }
+
+  setLeads((prev) =>
+    prev.map((item) =>
+      item.id === lead.id
+        ? {
+            ...item,
+            status: 'accepted',
+            client_id: clientData.id,
+            generated_access_code: accessCode,
+          }
+        : item
+    )
+  )
+
+  setMessage(`Onboarding creado. Código: ${accessCode}`)
+}
+
   const updateLeadStatus = async (leadId, status) => {
     setMessage('')
 
@@ -171,18 +247,28 @@ function AdminLeads() {
                   </p>
                 </div>
 
+                <div className="flex flex-col gap-2">
                 <select
-                  value={lead.status}
-                  onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                  className="rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] px-4 py-2 font-semibold text-[#2b2118] outline-none focus:border-[#c49a5a]"
+                    value={lead.status}
+                    onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                    className="rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] px-4 py-2 font-semibold text-[#2b2118] outline-none focus:border-[#c49a5a]"
                 >
-                  <option value="new">Nuevo</option>
-                  <option value="contacted">Contactado</option>
-                  <option value="qualified">Calificado</option>
-                  <option value="proposal_sent">Propuesta enviada</option>
-                  <option value="accepted">Aceptado</option>
-                  <option value="lost">Perdido</option>
+                    <option value="new">Nuevo</option>
+                    <option value="contacted">Contactado</option>
+                    <option value="qualified">Calificado</option>
+                    <option value="proposal_sent">Propuesta enviada</option>
+                    <option value="accepted">Aceptado</option>
+                    <option value="lost">Perdido</option>
                 </select>
+
+                <button
+                    onClick={() => createOnboardingFromLead(lead)}
+                    disabled={Boolean(lead.client_id)}
+                    className="rounded-2xl bg-[#7a3e22] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f2f19] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {lead.client_id ? 'Onboarding creado' : 'Crear onboarding'}
+                </button>
+                </div>
               </div>
 
               <div className="grid gap-3 text-sm md:grid-cols-2">
