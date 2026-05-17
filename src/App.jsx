@@ -14,6 +14,7 @@ import ContactCta from "./components/ContactCta";
 import Footer from "./components/Footer";
 import AnimatedBackground from "./components/AnimatedBackground";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
+import LeadMicroForm from "./components/LeadMicroForm";
 
 function HomePage({ lang, setLang, t, query, setQuery, cat, setCat, catLabel }) {
   return (
@@ -36,6 +37,7 @@ function HomePage({ lang, setLang, t, query, setQuery, cat, setCat, catLabel }) 
         />
         <DemoSection t={t} lang={lang} />
         <PlansSection t={t} />
+        <LeadMicroForm />
         <FounderSection t={t} />
         <ContactCta t={t} />
         <Footer t={t} />
