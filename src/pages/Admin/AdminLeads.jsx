@@ -81,6 +81,12 @@ const logLeadInteraction = async (leadId, actionType, note = '') => {
       restaurant_name,
       access_code,
       status
+    ),
+    lead_interactions (
+      id,
+      action_type,
+      note,
+      created_at
     )
   `)
   .order('created_at', { ascending: false })
@@ -423,6 +429,41 @@ const createOnboardingFromLead = async (lead) => {
                         </div>
                 </div>
                 )}
+                {lead.lead_interactions?.length > 0 && (
+  <div className="mt-4 rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] p-4">
+    <p className="mb-3 text-sm font-bold text-[#7a3e22]">
+      Historial comercial
+    </p>
+
+    <div className="space-y-2">
+      {lead.lead_interactions
+        .slice()
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .map((interaction) => (
+          <div
+            key={interaction.id}
+            className="rounded-xl bg-white px-3 py-2 text-sm text-[#7b6f64]"
+          >
+            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+              <span className="font-semibold text-[#2b2118]">
+                {interaction.action_type}
+              </span>
+
+              <span className="text-xs text-[#7b6f64]">
+                {new Date(interaction.created_at).toLocaleString('es-ES')}
+              </span>
+            </div>
+
+            {interaction.note && (
+              <p className="mt-1 text-xs">
+                {interaction.note}
+              </p>
+            )}
+          </div>
+        ))}
+    </div>
+  </div>
+)}
             </article>
           ))}
         </div>
