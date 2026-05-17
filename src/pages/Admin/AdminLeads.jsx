@@ -10,6 +10,7 @@ function AdminLeads() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const statusFilters = [
   { value: 'all', label: 'Todos' },
   { value: 'new', label: 'Nuevos' },
@@ -269,10 +270,30 @@ const createOnboardingFromLead = async (lead) => {
     )
   }
 
-  const filteredLeads =
-  statusFilter === 'all'
-    ? leads
-    : leads.filter((lead) => lead.status === statusFilter)
+  const filteredLeads = leads.filter((lead) => {
+  const matchesStatus =
+    statusFilter === 'all' || lead.status === statusFilter
+
+  const searchValue = searchTerm.toLowerCase().trim()
+
+  const searchableText = [
+    lead.restaurant_name,
+    lead.contact_name,
+    lead.email,
+    lead.phone,
+    lead.interest,
+    lead.contact_method,
+    lead.message,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
+  const matchesSearch =
+    !searchValue || searchableText.includes(searchValue)
+
+  return matchesStatus && matchesSearch
+})
   const getStatusCount = (status) => {
     if (status === 'all') return leads.length
     return leads.filter((lead) => lead.status === status).length
@@ -309,6 +330,15 @@ const createOnboardingFromLead = async (lead) => {
             {message}
           </p>
         )}
+        <div className="mb-4">
+            <input
+                type="text"
+                placeholder="Buscar por restaurante, contacto, email, teléfono o interés..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-2xl border border-[#e5d8c7] bg-white px-4 py-3 text-sm text-[#2b2118] outline-none transition focus:border-[#c49a5a]"
+            />
+            </div>
         <div className="mb-6 flex flex-wrap gap-2">
             {statusFilters.map((filter) => (
                 <button
