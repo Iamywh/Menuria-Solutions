@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import AnimatedBackground from "./components/AnimatedBackground";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
 import LeadMicroForm from "./components/LeadMicroForm";
+import AdminLeads from "./pages/Admin/AdminLeads";
 
 function HomePage({ lang, setLang, t, query, setQuery, cat, setCat, catLabel }) {
   return (
@@ -85,6 +86,7 @@ function App() {
       />
 
       <Route path="/questionnaire" element={<Questionnaire />} />
+      <Route path="/admin/leads" element={<AdminLeads />} />
     </Routes>
   );
 }

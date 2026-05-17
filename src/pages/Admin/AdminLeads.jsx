@@ -1,0 +1,223 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabaseClient'
+
+const ADMIN_CODE = 'MENURIA-ADMIN-2026'
+
+function AdminLeads() {
+  const [accessCode, setAccessCode] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [leads, setLeads] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const loadLeads = async () => {
+    setLoading(true)
+    setMessage('')
+
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    setLoading(false)
+
+    if (error) {
+      console.error(error)
+      setMessage('No se pudieron cargar los leads.')
+      return
+    }
+
+    setLeads(data || [])
+  }
+
+  const handleAccess = () => {
+    if (accessCode.trim() !== ADMIN_CODE) {
+      setMessage('Código admin no válido.')
+      return
+    }
+
+    setIsAdmin(true)
+    setMessage('')
+  }
+
+  const updateLeadStatus = async (leadId, status) => {
+    setMessage('')
+
+    const { error } = await supabase
+      .from('leads')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', leadId)
+
+    if (error) {
+      console.error(error)
+      setMessage('No se pudo actualizar el estado del lead.')
+      return
+    }
+
+    setLeads((prev) =>
+      prev.map((lead) =>
+        lead.id === leadId ? { ...lead, status } : lead
+      )
+    )
+  }
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadLeads()
+    }
+  }, [isAdmin])
+
+  if (!isAdmin) {
+    return (
+      <main className="min-h-screen bg-[#f8f3ea] px-6 py-12 text-[#2b2118]">
+        <section className="mx-auto max-w-md rounded-3xl border border-[#e5d8c7] bg-white p-8 shadow-xl">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.25em] text-[#c49a5a]">
+            Menuria Admin
+          </p>
+
+          <h1 className="mb-4 text-3xl font-bold text-[#7a3e22]">
+            Acceso leads
+          </h1>
+
+          <p className="mb-6 text-[#7b6f64]">
+            Introduce el código admin para ver los contactos recibidos.
+          </p>
+
+          <input
+            type="password"
+            placeholder="Código admin"
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value)}
+            className="mb-4 w-full rounded-2xl border border-[#e5d8c7] px-4 py-3 outline-none focus:border-[#c49a5a]"
+          />
+
+          {message && (
+            <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {message}
+            </p>
+          )}
+
+          <button
+            onClick={handleAccess}
+            className="w-full rounded-2xl bg-[#7a3e22] px-5 py-3 font-bold text-white transition hover:bg-[#5f2f19]"
+          >
+            Entrar
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f8f3ea] px-4 py-8 text-[#2b2118] md:px-8">
+      <section className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-[#c49a5a]">
+              Menuria Admin
+            </p>
+
+            <h1 className="text-3xl font-bold text-[#7a3e22] md:text-4xl">
+              Leads recibidos
+            </h1>
+
+            <p className="mt-2 text-[#7b6f64]">
+              Contactos capturados desde el microform de la web.
+            </p>
+          </div>
+
+          <button
+            onClick={loadLeads}
+            disabled={loading}
+            className="rounded-2xl border border-[#c49a5a] bg-white px-5 py-3 font-bold text-[#7a3e22] transition hover:bg-[#fff8ee] disabled:opacity-60"
+          >
+            {loading ? 'Cargando...' : 'Actualizar'}
+          </button>
+        </div>
+
+        {message && (
+          <p className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {message}
+          </p>
+        )}
+
+        <div className="grid gap-4">
+          {leads.length === 0 && !loading && (
+            <div className="rounded-3xl border border-[#e5d8c7] bg-white p-8 text-center text-[#7b6f64]">
+              Todavía no hay leads.
+            </div>
+          )}
+
+          {leads.map((lead) => (
+            <article
+              key={lead.id}
+              className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm"
+            >
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-[#7a3e22]">
+                    {lead.restaurant_name || 'Restaurante sin nombre'}
+                  </h2>
+
+                  <p className="text-sm text-[#7b6f64]">
+                    Contacto: <strong>{lead.contact_name}</strong>
+                  </p>
+
+                  <p className="text-sm text-[#7b6f64]">
+                    Recibido: {new Date(lead.created_at).toLocaleString('es-ES')}
+                  </p>
+                </div>
+
+                <select
+                  value={lead.status}
+                  onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                  className="rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] px-4 py-2 font-semibold text-[#2b2118] outline-none focus:border-[#c49a5a]"
+                >
+                  <option value="new">Nuevo</option>
+                  <option value="contacted">Contactado</option>
+                  <option value="qualified">Calificado</option>
+                  <option value="proposal_sent">Propuesta enviada</option>
+                  <option value="accepted">Aceptado</option>
+                  <option value="lost">Perdido</option>
+                </select>
+              </div>
+
+              <div className="grid gap-3 text-sm md:grid-cols-2">
+                <p>
+                  <span className="font-bold text-[#2b2118]">Método:</span>{' '}
+                  {lead.contact_method}
+                </p>
+
+                <p>
+                  <span className="font-bold text-[#2b2118]">Interés:</span>{' '}
+                  {lead.interest || 'No indicado'}
+                </p>
+
+                <p>
+                  <span className="font-bold text-[#2b2118]">Teléfono:</span>{' '}
+                  {lead.phone || 'No indicado'}
+                </p>
+
+                <p>
+                  <span className="font-bold text-[#2b2118]">Email:</span>{' '}
+                  {lead.email || 'No indicado'}
+                </p>
+              </div>
+
+              {lead.message && (
+                <p className="mt-4 rounded-2xl bg-[#f8f3ea] p-4 text-sm leading-relaxed text-[#7b6f64]">
+                  {lead.message}
+                </p>
+              )}
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+  )
+}
+
+export default AdminLeads
