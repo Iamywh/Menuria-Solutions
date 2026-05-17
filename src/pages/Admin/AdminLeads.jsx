@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 
-const ADMIN_CODE = 'MENURIA-ADMIN-2026'
+const ADMIN_CODE = import.meta.env.VITE_ADMIN_CODE
 
 function AdminLeads() {
     const [accessCode, setAccessCode] = useState('')
@@ -391,8 +391,8 @@ Menuria Solutions`
                             key={filter.value}
                             onClick={() => setStatusFilter(filter.value)}
                             className={`rounded-full border px-4 py-2 text-sm font-bold transition ${statusFilter === filter.value
-                                    ? 'border-[#7a3e22] bg-[#f4c76b] text-white'
-                                    : 'border-[#c49a5a] bg-white/10 text-[#f4c76b] hover:bg-[#fff8ee]'
+                                ? 'border-[#7a3e22] bg-[#f4c76b] text-white'
+                                : 'border-[#c49a5a] bg-white/10 text-[#f4c76b] hover:bg-[#fff8ee]'
                                 }`}
                         >
                             {filter.label}
