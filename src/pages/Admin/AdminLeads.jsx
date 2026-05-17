@@ -15,9 +15,17 @@ function AdminLeads() {
     setMessage('')
 
     const { data, error } = await supabase
-      .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false })
+  .from('leads')
+  .select(`
+    *,
+    clients (
+      id,
+      restaurant_name,
+      access_code,
+      status
+    )
+  `)
+  .order('created_at', { ascending: false })
 
     setLoading(false)
 
@@ -298,6 +306,68 @@ const createOnboardingFromLead = async (lead) => {
                   {lead.message}
                 </p>
               )}
+              {lead.clients?.access_code && (
+                <div className="mt-4 rounded-2xl border border-[#c49a5a]/40 bg-[#fff8ee] p-4">
+                    <p className="mb-2 text-sm font-bold text-[#7a3e22]">
+                    Onboarding creado
+                    </p>
+
+                    <p className="text-sm text-[#7b6f64]">
+                    Link:
+                    <span className="ml-2 font-semibold text-[#2b2118]">
+                        /questionnaire
+                    </span>
+                    </p>
+
+                    <p className="text-sm text-[#7b6f64]">
+                    Código:
+                    <span className="ml-2 font-semibold text-[#2b2118]">
+                        {lead.clients.access_code}
+                    </span>
+                    </p>
+
+                    <textarea
+                    readOnly
+                    value={`Hola ${lead.contact_name}, gracias por tu interés en Menuria Solutions.
+
+                Ya hemos preparado tu acceso privado al formulario de onboarding.
+
+                Enlace:
+                ${window.location.origin}/questionnaire
+
+                Código de acceso:
+                ${lead.clients.access_code}
+
+                Con este formulario podremos recopilar la información necesaria para preparar la estructura digital de tu restaurante.
+
+                Un saludo,
+                Menuria Solutions`}
+                    className="mt-4 min-h-44 w-full rounded-2xl border border-[#e5d8c7] bg-white p-4 text-sm text-[#2b2118] outline-none"
+                    />
+
+                    <button
+                    onClick={() =>
+                        navigator.clipboard.writeText(`Hola ${lead.contact_name}, gracias por tu interés en Menuria Solutions.
+
+                Ya hemos preparado tu acceso privado al formulario de onboarding.
+
+                Enlace:
+                ${window.location.origin}/questionnaire
+
+                Código de acceso:
+                ${lead.clients.access_code}
+
+                Con este formulario podremos recopilar la información necesaria para preparar la estructura digital de tu restaurante.
+
+                Un saludo,
+                Menuria Solutions`)
+                    }
+                    className="mt-3 rounded-2xl bg-[#7a3e22] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f2f19]"
+                    >
+                    Copiar mensaje para cliente
+                    </button>
+                </div>
+                )}
             </article>
           ))}
         </div>
