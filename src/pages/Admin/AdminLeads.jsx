@@ -10,6 +10,50 @@ function AdminLeads() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
+    const getOnboardingMessage = (lead) => {
+  if (!lead.clients?.access_code) return ''
+
+  return `Hola ${lead.contact_name}, gracias por tu interés en Menuria Solutions.
+
+Ya hemos preparado tu acceso privado al formulario de onboarding.
+
+Enlace:
+${window.location.origin}/questionnaire
+
+Código de acceso:
+${lead.clients.access_code}
+
+Con este formulario podremos recopilar la información necesaria para preparar la estructura digital de tu restaurante.
+
+Un saludo,
+Menuria Solutions`
+}
+
+const openWhatsApp = (lead) => {
+  const phone = (lead.phone || '').replace(/\D/g, '')
+  const message = encodeURIComponent(getOnboardingMessage(lead))
+
+  if (!phone) {
+    setMessage('Este lead no tiene teléfono para WhatsApp.')
+    return
+  }
+
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+}
+
+const openEmail = (lead) => {
+  const email = lead.email || ''
+  const subject = encodeURIComponent('Acceso onboarding Menuria Solutions')
+  const body = encodeURIComponent(getOnboardingMessage(lead))
+
+  if (!email) {
+    setMessage('Este lead no tiene email.')
+    return
+  }
+
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
+}
+
   const loadLeads = async () => {
     setLoading(true)
     setMessage('')
@@ -327,45 +371,33 @@ const createOnboardingFromLead = async (lead) => {
                     </p>
 
                     <textarea
-                    readOnly
-                    value={`Hola ${lead.contact_name}, gracias por tu interés en Menuria Solutions.
+                        readOnly
+                        value={getOnboardingMessage(lead)}
+                        className="mt-4 min-h-44 w-full rounded-2xl border border-[#e5d8c7] bg-white p-4 text-sm text-[#2b2118] outline-none"
+                        />
 
-                Ya hemos preparado tu acceso privado al formulario de onboarding.
+                        <div className="mt-3 flex flex-col gap-2 md:flex-row">
+                        <button
+                            onClick={() => navigator.clipboard.writeText(getOnboardingMessage(lead))}
+                            className="rounded-2xl bg-[#7a3e22] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f2f19]"
+                        >
+                            Copiar mensaje
+                        </button>
 
-                Enlace:
-                ${window.location.origin}/questionnaire
+                        <button
+                            onClick={() => openWhatsApp(lead)}
+                            className="rounded-2xl bg-[#1f7a4d] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#17613d]"
+                        >
+                            Abrir WhatsApp
+                        </button>
 
-                Código de acceso:
-                ${lead.clients.access_code}
-
-                Con este formulario podremos recopilar la información necesaria para preparar la estructura digital de tu restaurante.
-
-                Un saludo,
-                Menuria Solutions`}
-                    className="mt-4 min-h-44 w-full rounded-2xl border border-[#e5d8c7] bg-white p-4 text-sm text-[#2b2118] outline-none"
-                    />
-
-                    <button
-                    onClick={() =>
-                        navigator.clipboard.writeText(`Hola ${lead.contact_name}, gracias por tu interés en Menuria Solutions.
-
-                Ya hemos preparado tu acceso privado al formulario de onboarding.
-
-                Enlace:
-                ${window.location.origin}/questionnaire
-
-                Código de acceso:
-                ${lead.clients.access_code}
-
-                Con este formulario podremos recopilar la información necesaria para preparar la estructura digital de tu restaurante.
-
-                Un saludo,
-                Menuria Solutions`)
-                    }
-                    className="mt-3 rounded-2xl bg-[#7a3e22] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f2f19]"
-                    >
-                    Copiar mensaje para cliente
-                    </button>
+                        <button
+                            onClick={() => openEmail(lead)}
+                            className="rounded-2xl bg-[#2f5f9f] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#254d80]"
+                        >
+                            Abrir email
+                        </button>
+                        </div>
                 </div>
                 )}
             </article>
