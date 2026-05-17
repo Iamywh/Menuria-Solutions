@@ -298,6 +298,12 @@ const createOnboardingFromLead = async (lead) => {
     if (status === 'all') return leads.length
     return leads.filter((lead) => lead.status === status).length
     }
+    const totalLeads = leads.length
+    const newLeads = getStatusCount('new')
+    const acceptedLeads = getStatusCount('accepted')
+    const contactedLeads = getStatusCount('contacted')
+    const conversionRate =
+        totalLeads === 0 ? 0 : Math.round((acceptedLeads / totalLeads) * 100)
   return (
     <main className="min-h-screen bg-[#f8f3ea] px-4 py-8 text-[#2b2118] md:px-8">
       <section className="mx-auto max-w-6xl">
@@ -330,6 +336,46 @@ const createOnboardingFromLead = async (lead) => {
             {message}
           </p>
         )}
+        <div className="mb-6 grid gap-4 md:grid-cols-4">
+            <div className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#c49a5a]">
+                Total leads
+                </p>
+                <p className="mt-2 text-3xl font-bold text-[#7a3e22]">
+                {totalLeads}
+                </p>
+            </div>
+
+            <div className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#c49a5a]">
+                Nuevos
+                </p>
+                <p className="mt-2 text-3xl font-bold text-[#7a3e22]">
+                {newLeads}
+                </p>
+            </div>
+
+            <div className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#c49a5a]">
+                Contactados
+                </p>
+                <p className="mt-2 text-3xl font-bold text-[#7a3e22]">
+                {contactedLeads}
+                </p>
+            </div>
+
+            <div className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#c49a5a]">
+                Conversión
+                </p>
+                <p className="mt-2 text-3xl font-bold text-[#7a3e22]">
+                {conversionRate}%
+                </p>
+                <p className="mt-1 text-xs text-[#7b6f64]">
+                Leads aceptados / total
+                </p>
+            </div>
+            </div>
         <div className="mb-4">
             <input
                 type="text"
