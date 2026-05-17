@@ -9,6 +9,16 @@ function AdminLeads() {
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const statusFilters = [
+  { value: 'all', label: 'Todos' },
+  { value: 'new', label: 'Nuevos' },
+  { value: 'contacted', label: 'Contactados' },
+  { value: 'qualified', label: 'Calificados' },
+  { value: 'proposal_sent', label: 'Propuesta enviada' },
+  { value: 'accepted', label: 'Aceptados' },
+  { value: 'lost', label: 'Perdidos' },
+]
 
     const getOnboardingMessage = (lead) => {
   if (!lead.clients?.access_code) return ''
@@ -259,6 +269,11 @@ const createOnboardingFromLead = async (lead) => {
     )
   }
 
+  const filteredLeads =
+  statusFilter === 'all'
+    ? leads
+    : leads.filter((lead) => lead.status === statusFilter)
+
   return (
     <main className="min-h-screen bg-[#f8f3ea] px-4 py-8 text-[#2b2118] md:px-8">
       <section className="mx-auto max-w-6xl">
@@ -291,15 +306,29 @@ const createOnboardingFromLead = async (lead) => {
             {message}
           </p>
         )}
-
+        <div className="mb-6 flex flex-wrap gap-2">
+            {statusFilters.map((filter) => (
+                <button
+                key={filter.value}
+                onClick={() => setStatusFilter(filter.value)}
+                className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
+                    statusFilter === filter.value
+                    ? 'border-[#7a3e22] bg-[#7a3e22] text-white'
+                    : 'border-[#c49a5a] bg-white text-[#7a3e22] hover:bg-[#fff8ee]'
+                }`}
+                >
+                {filter.label}
+                </button>
+            ))}
+            </div>
         <div className="grid gap-4">
-          {leads.length === 0 && !loading && (
+          {filteredLeads.length === 0 && !loading && (
             <div className="rounded-3xl border border-[#e5d8c7] bg-white p-8 text-center text-[#7b6f64]">
               Todavía no hay leads.
             </div>
           )}
 
-          {leads.map((lead) => (
+          {filteredLeads.map((lead) => (
             <article
               key={lead.id}
               className="rounded-3xl border border-[#e5d8c7] bg-white p-5 shadow-sm"
@@ -430,40 +459,40 @@ const createOnboardingFromLead = async (lead) => {
                 </div>
                 )}
                 {lead.lead_interactions?.length > 0 && (
-  <div className="mt-4 rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] p-4">
-    <p className="mb-3 text-sm font-bold text-[#7a3e22]">
-      Historial comercial
-    </p>
+                    <div className="mt-4 rounded-2xl border border-[#e5d8c7] bg-[#f8f3ea] p-4">
+                        <p className="mb-3 text-sm font-bold text-[#7a3e22]">
+                        Historial comercial
+                        </p>
 
-    <div className="space-y-2">
-      {lead.lead_interactions
-        .slice()
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .map((interaction) => (
-          <div
-            key={interaction.id}
-            className="rounded-xl bg-white px-3 py-2 text-sm text-[#7b6f64]"
-          >
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-              <span className="font-semibold text-[#2b2118]">
-                {interaction.action_type}
-              </span>
+                        <div className="space-y-2">
+                        {lead.lead_interactions
+                            .slice()
+                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                            .map((interaction) => (
+                            <div
+                                key={interaction.id}
+                                className="rounded-xl bg-white px-3 py-2 text-sm text-[#7b6f64]"
+                            >
+                                <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                                <span className="font-semibold text-[#2b2118]">
+                                    {interaction.action_type}
+                                </span>
 
-              <span className="text-xs text-[#7b6f64]">
-                {new Date(interaction.created_at).toLocaleString('es-ES')}
-              </span>
-            </div>
+                                <span className="text-xs text-[#7b6f64]">
+                                    {new Date(interaction.created_at).toLocaleString('es-ES')}
+                                </span>
+                                </div>
 
-            {interaction.note && (
-              <p className="mt-1 text-xs">
-                {interaction.note}
-              </p>
-            )}
-          </div>
-        ))}
-    </div>
-  </div>
-)}
+                                {interaction.note && (
+                                <p className="mt-1 text-xs">
+                                    {interaction.note}
+                                </p>
+                                )}
+                            </div>
+                            ))}
+                        </div>
+                    </div>
+                    )}
             </article>
           ))}
         </div>
