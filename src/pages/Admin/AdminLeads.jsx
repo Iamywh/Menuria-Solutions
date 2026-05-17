@@ -273,7 +273,10 @@ const createOnboardingFromLead = async (lead) => {
   statusFilter === 'all'
     ? leads
     : leads.filter((lead) => lead.status === statusFilter)
-
+  const getStatusCount = (status) => {
+    if (status === 'all') return leads.length
+    return leads.filter((lead) => lead.status === status).length
+    }
   return (
     <main className="min-h-screen bg-[#f8f3ea] px-4 py-8 text-[#2b2118] md:px-8">
       <section className="mx-auto max-w-6xl">
@@ -318,6 +321,9 @@ const createOnboardingFromLead = async (lead) => {
                 }`}
                 >
                 {filter.label}
+                    <span className="ml-2 rounded-full bg-white/25 px-2 py-0.5 text-xs">
+                    {getStatusCount(filter.value)}
+                    </span>
                 </button>
             ))}
             </div>
