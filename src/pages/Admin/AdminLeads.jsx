@@ -54,6 +54,20 @@ const openEmail = (lead) => {
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
 }
 
+const logLeadInteraction = async (leadId, actionType, note = '') => {
+  const { error } = await supabase
+    .from('lead_interactions')
+    .insert({
+      lead_id: leadId,
+      action_type: actionType,
+      note,
+    })
+
+  if (error) {
+    console.error(error)
+    setMessage('Acción realizada, pero no se pudo guardar la interacción.')
+  }
+}
   const loadLeads = async () => {
     setLoading(true)
     setMessage('')
@@ -378,21 +392,30 @@ const createOnboardingFromLead = async (lead) => {
 
                         <div className="mt-3 flex flex-col gap-2 md:flex-row">
                         <button
-                            onClick={() => navigator.clipboard.writeText(getOnboardingMessage(lead))}
+                            onClick={async () => {
+                                await navigator.clipboard.writeText(getOnboardingMessage(lead))
+                                await logLeadInteraction(lead.id, 'copy_message', 'Mensaje de onboarding copiado')
+                                }}
                             className="rounded-2xl bg-[#7a3e22] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f2f19]"
                         >
                             Copiar mensaje
                         </button>
 
                         <button
-                            onClick={() => openWhatsApp(lead)}
+                            onClick={async () => {
+                                openWhatsApp(lead)
+                                await logLeadInteraction(lead.id, 'whatsapp_opened', 'WhatsApp abierto con mensaje de onboarding')
+                                }}
                             className="rounded-2xl bg-[#1f7a4d] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#17613d]"
                         >
                             Abrir WhatsApp
                         </button>
 
                         <button
-                            onClick={() => openEmail(lead)}
+                            onClick={async () => {
+                                openEmail(lead)
+                                await logLeadInteraction(lead.id, 'email_opened', 'Email abierto con mensaje de onboarding')
+                                }}
                             className="rounded-2xl bg-[#2f5f9f] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#254d80]"
                         >
                             Abrir email
