@@ -123,20 +123,7 @@ Menuria Solutions`
         setMessage('')
     }
 
-    const generateAccessCode = (restaurantName = '') => {
-        const cleanPrefix = restaurantName
-            .toUpperCase()
-            .replace(/[^A-Z0-9\s]/g, '')
-            .split(' ')
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((word) => word.slice(0, 3))
-            .join('-') || 'MENURIA'
-
-        const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase()
-
-        return `${cleanPrefix}-2026-${randomPart}`
-    }
+    
 
     const createOnboardingFromLead = async (lead) => {
         setMessage('')
@@ -146,40 +133,27 @@ Menuria Solutions`
             return
         }
 
-        const accessCode = generateAccessCode(lead.restaurant_name)
+        const { data, error } = await supabase.functions.invoke(
+            'admin-create-onboarding',
+            {
+                body: {
+                    leadId: lead.id,
+                },
+                headers: {
+                    'x-admin-code': ADMIN_CODE,
+                },
+            }
+        )
 
-        const { data: clientData, error: clientError } = await supabase
-            .from('clients')
-            .insert({
-                restaurant_name: lead.restaurant_name || 'Restaurante sin nombre',
-                contact_name: lead.contact_name,
-                email: lead.email || null,
-                phone: lead.phone || null,
-                access_code: accessCode,
-                status: 'onboarding',
-                updated_at: new Date().toISOString(),
-            })
-            .select()
-            .single()
-
-        if (clientError) {
-            console.error(clientError)
+        if (error) {
+            console.error(error)
             setMessage('No se pudo crear el onboarding para este lead.')
             return
         }
 
-        const { error: leadError } = await supabase
-            .from('leads')
-            .update({
-                status: 'accepted',
-                client_id: clientData.id,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', lead.id)
-
-        if (leadError) {
-            console.error(leadError)
-            setMessage('Cliente creado, pero no se pudo vincular el lead.')
+        if (!data?.success) {
+            console.error(data)
+            setMessage(data?.error || 'No se pudo crear el onboarding.')
             return
         }
 
@@ -189,15 +163,21 @@ Menuria Solutions`
                     ? {
                         ...item,
                         status: 'accepted',
-                        client_id: clientData.id,
-                        generated_access_code: accessCode,
+                        client_id: data.client.id,
+                        clients: {
+                            id: data.client.id,
+                            restaurant_name: data.client.restaurant_name,
+                            access_code: data.accessCode,
+                            status: data.client.status,
+                        },
                     }
                     : item
             )
         )
 
-        setMessage(`Onboarding creado. Código: ${accessCode}`)
+        setMessage(`Onboarding creado. Código: ${data.accessCode}`)
     }
+
 
     const updateLeadStatus = async (leadId, status) => {
         setMessage('')
